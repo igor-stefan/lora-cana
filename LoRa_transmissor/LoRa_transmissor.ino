@@ -212,6 +212,10 @@ void setup() {
 
   /* inicializa temperaturas máxima e mínima com a leitura inicial do sensor */
   temperatura_max = dht.readTemperature();
+  while(temperatura_max > 50 || temperatura_max < 0 || isnan(temperatura_max)){
+    Serial.println("ERRO NO SETUP - VALOR DE TEMPERATURA COM PROBLEMA VERIFIQUE O SENSOR...");
+    delay(300);
+  }
   temperatura_min = temperatura_max;
 
   /* inicializa display OLED */
@@ -240,14 +244,22 @@ void setup() {
    Programa principal
 */
 void loop() {
-  float temperatura_lida;
-  float umidade_lida;
+  float temperatura_lida = 0;
+  float umidade_lida = 0;
 
   /* Faz a leitura de temperatura e umidade do sensor */
+
   temperatura_lida = dht.readTemperature();
   umidade_lida = dht.readHumidity();
+  while(temperatura_lida > 50 || temperatura_lida < 0 || umidade_lida > 100 
+  || umidade_lida < 0 || isnan(temperatura_lida) || isnan(umidade_lida)){
+    Serial.println("LOOP - Erro ao FAZER LEITURA - VALOR INVALIDO - VERIFIQUE O SENSOR");
+    temperatura_lida = dht.readTemperature();
+    umidade_lida = dht.readHumidity();
+    delay(300);
+   }
   /* se houve falha na leitura do sensor, escreve mensagem de erro na serial */
-  if ( isnan(temperatura_lida) || isnan(umidade_lida) )
+  if(isnan(temperatura_lida) || isnan(umidade_lida))
     Serial.println("Erro ao ler sensor DHT11!");
   else
   {
@@ -271,6 +283,6 @@ void loop() {
     envia_informacoes_lora(temperatura_lida, umidade_lida);
   }
 
-  /* espera trinta segundos até a próxima leitura  */
-  delay(30000);
+  /* intervalo até a próxima leitura  */
+  delay(5000);
 }
